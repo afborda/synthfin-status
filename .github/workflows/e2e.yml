@@ -1,0 +1,75 @@
+name: E2E Tests + Dashboard
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # a cada 6 horas
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages:    write
+  id-token: write
+
+jobs:
+  e2e:
+    name: Run E2E + Publish Dashboard
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install httpx -q
+
+      - name: Run E2E suite
+        env:
+          SYNTHFIN_TEST_KEY:     ${{ secrets.SYNTHFIN_TEST_KEY }}
+          SYNTHFIN_ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          SYNTHFIN_API_URL:      https://api.synthfin.com.br
+          SYNTHFIN_WEB_URL:      https://app.synthfin.com.br
+          SYNTHFIN_LAND_URL:     https://synthfin.com.br
+        run: |
+          mkdir -p results
+          python3 run_e2e.py
+        continue-on-error: true
+
+      - name: Generate dashboard
+        run: python3 generate_dashboard.py results/latest.json results/index.html
+
+      - name: Write badge data
+        run: |
+          python3 - <<'PYEOF'
+          import json
+          from pathlib import Path
+          d = json.loads(Path("results/latest.json").read_text())
+          rate = d["summary"]["pass_rate"]
+          color = "brightgreen" if rate >= 95 else "yellow" if rate >= 80 else "red"
+          badge = {"schemaVersion": 1, "label": "e2e", "message": f"{rate}% pass", "color": color}
+          Path("results/badge.json").write_text(json.dumps(badge))
+          print(f"Badge: {badge['message']} ({color})")
+          PYEOF
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: results
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summary
+        run: |
+          PASS=$(python3 -c "import json; d=json.load(open('results/latest.json')); print(d['summary']['pass_rate'])")
+          echo "## E2E Results" >> $GITHUB_STEP_SUMMARY
+          echo "Pass rate: **${PASS}%**" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 Dashboard: https://afborda.github.io/synthfin-status/" >> $GITHUB_STEP_SUMMARY
