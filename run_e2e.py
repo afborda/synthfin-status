@@ -397,11 +397,15 @@ async def main() -> SuiteResult:
 
         # ── Infrastructure ────────────────────────────────────────────────────
         print("📡 Infrastructure")
-        await run_test("Health check",       "infra", test_health(client),       suite)
-        await run_test("Admin dashboard",    "infra", test_admin_dashboard(client), suite,
-                       skip_if=not ADMIN_SECRET)
-        await run_test("Server health",      "infra", test_admin_server_health(client), suite,
-                       skip_if=not ADMIN_SECRET)
+        await run_test("Health check",    "infra", test_health(client), suite)
+        if ADMIN_SECRET:
+            await run_test("Admin dashboard",  "infra", test_admin_dashboard(client),    suite)
+            await run_test("Server health",    "infra", test_admin_server_health(client), suite)
+        else:
+            suite.results.append(TestResult(name="Admin dashboard",  category="infra", status="skip", duration_ms=0))
+            suite.results.append(TestResult(name="Server health",    category="infra", status="skip", duration_ms=0))
+            print("  ⏭  Admin dashboard (no ADMIN_SECRET)")
+            print("  ⏭  Server health (no ADMIN_SECRET)")
 
         # ── Auth & Usage ──────────────────────────────────────────────────────
         print("\n🔑 Auth & Usage")
