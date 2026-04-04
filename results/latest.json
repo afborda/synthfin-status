@@ -1,0 +1,238 @@
+{
+  "run_id": "6119948e",
+  "started_at": "2026-04-04T23:22:45.553852+00:00",
+  "finished_at": "2026-04-04T23:22:59.971653+00:00",
+  "env": "production",
+  "api_url": "https://api.synthfin.com.br",
+  "summary": {
+    "total": 17,
+    "passed": 12,
+    "failed": 3,
+    "skipped": 2,
+    "pass_rate": 80.0,
+    "avg_duration_ms": 1032.0
+  },
+  "results": [
+    {
+      "name": "Health check",
+      "category": "infra",
+      "status": "pass",
+      "duration_ms": 329.3,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "checks": {
+          "redis": true,
+          "database": true
+        },
+        "version": "4.1.0"
+      },
+      "timestamp": "2026-04-04T23:22:45.993753+00:00"
+    },
+    {
+      "name": "Admin dashboard",
+      "category": "infra",
+      "status": "skip",
+      "duration_ms": 0,
+      "http_status": null,
+      "error": null,
+      "details": {},
+      "timestamp": "2026-04-04T23:22:45.993798+00:00"
+    },
+    {
+      "name": "Server health",
+      "category": "infra",
+      "status": "skip",
+      "duration_ms": 0,
+      "http_status": null,
+      "error": null,
+      "details": {},
+      "timestamp": "2026-04-04T23:22:45.997494+00:00"
+    },
+    {
+      "name": "GET /v2/usage",
+      "category": "auth",
+      "status": "pass",
+      "duration_ms": 37.8,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "plan": "starter",
+        "events_remaining": 999278
+      },
+      "timestamp": "2026-04-04T23:22:46.035384+00:00"
+    },
+    {
+      "name": "GET /v2/usage/history",
+      "category": "auth",
+      "status": "pass",
+      "duration_ms": 28.1,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "days": 30
+      },
+      "timestamp": "2026-04-04T23:22:46.063501+00:00"
+    },
+    {
+      "name": "POST /v2/auth/recover",
+      "category": "auth",
+      "status": "fail",
+      "duration_ms": 23.8,
+      "http_status": null,
+      "error": "Recovery: expected 200, got 401",
+      "details": {},
+      "timestamp": "2026-04-04T23:22:46.087293+00:00"
+    },
+    {
+      "name": "POST /v2/generate (500 eventos)",
+      "category": "batch",
+      "status": "pass",
+      "duration_ms": 3076.3,
+      "http_status": 202,
+      "error": null,
+      "details": {
+        "status": 202,
+        "job_id": "job_822c04021307",
+        "final_status": "done",
+        "events_generated": 500,
+        "file_size_bytes": 1592425,
+        "eta_seconds": 3
+      },
+      "timestamp": "2026-04-04T23:22:49.163640+00:00"
+    },
+    {
+      "name": "GET /v2/jobs",
+      "category": "batch",
+      "status": "pass",
+      "duration_ms": 28.4,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "jobs_returned": 5
+      },
+      "timestamp": "2026-04-04T23:22:49.192061+00:00"
+    },
+    {
+      "name": "POST /v2/streams (lifecycle)",
+      "category": "stream",
+      "status": "pass",
+      "duration_ms": 7104.8,
+      "http_status": 201,
+      "error": null,
+      "details": {
+        "status": 201,
+        "stream_id": "str_c6e4c968100b",
+        "events_sent": 22
+      },
+      "timestamp": "2026-04-04T23:22:56.296875+00:00"
+    },
+    {
+      "name": "POST /v2/docs/chat (SSE)",
+      "category": "ai",
+      "status": "fail",
+      "duration_ms": 1856.6,
+      "http_status": null,
+      "error": "No tokens received from docs-chat",
+      "details": {},
+      "timestamp": "2026-04-04T23:22:58.153526+00:00"
+    },
+    {
+      "name": "POST /v2/ml/chat (ML Advisor)",
+      "category": "ai",
+      "status": "pass",
+      "duration_ms": 877.7,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "tokens_received": 31
+      },
+      "timestamp": "2026-04-04T23:22:59.031258+00:00"
+    },
+    {
+      "name": "Landing page",
+      "category": "web",
+      "status": "pass",
+      "duration_ms": 322.4,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "size_bytes": 129160,
+        "url": "https://synthfin.com.br"
+      },
+      "timestamp": "2026-04-04T23:22:59.353749+00:00"
+    },
+    {
+      "name": "Login page",
+      "category": "web",
+      "status": "pass",
+      "duration_ms": 368.6,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "size_bytes": 8018,
+        "url": "https://app.synthfin.com.br/login"
+      },
+      "timestamp": "2026-04-04T23:22:59.722371+00:00"
+    },
+    {
+      "name": "Dashboard (200)",
+      "category": "web",
+      "status": "pass",
+      "duration_ms": 68.7,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "size_bytes": 8093,
+        "url": "https://app.synthfin.com.br/dashboard"
+      },
+      "timestamp": "2026-04-04T23:22:59.791100+00:00"
+    },
+    {
+      "name": "Plans page",
+      "category": "web",
+      "status": "pass",
+      "duration_ms": 70.0,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "size_bytes": 8081,
+        "url": "https://app.synthfin.com.br/plans"
+      },
+      "timestamp": "2026-04-04T23:22:59.861127+00:00"
+    },
+    {
+      "name": "Docs page",
+      "category": "web",
+      "status": "pass",
+      "duration_ms": 72.1,
+      "http_status": 200,
+      "error": null,
+      "details": {
+        "status": 200,
+        "size_bytes": 8078,
+        "url": "https://app.synthfin.com.br/docs"
+      },
+      "timestamp": "2026-04-04T23:22:59.933244+00:00"
+    },
+    {
+      "name": "ML Advisor page",
+      "category": "web",
+      "status": "fail",
+      "duration_ms": 38.0,
+      "http_status": null,
+      "error": "ML Advisor: expected 200, got 404",
+      "details": {},
+      "timestamp": "2026-04-04T23:22:59.971263+00:00"
+    }
+  ]
+}
