@@ -2,7 +2,7 @@ name: E2E Tests + Dashboard
 
 on:
   schedule:
-    - cron: "17 */6 * * *"   # a cada 6 horas
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -39,24 +39,40 @@ jobs:
           SYNTHFIN_LAND_URL:     https://synthfin.com.br
         run: |
           mkdir -p results
-          python3 run_e2e.py
-        continue-on-error: true
+          python3 run_e2e.py || true   # never fail the workflow — always publish dashboard
 
       - name: Generate dashboard
-        run: python3 generate_dashboard.py results/latest.json results/index.html
+        run: |
+          if [ -f results/latest.json ]; then
+            python3 generate_dashboard.py results/latest.json results/index.html
+            echo "Dashboard generated"
+          else
+            echo '{"run_id":"no-data","started_at":"","summary":{"total":0,"passed":0,"failed":0,"skipped":0,"pass_rate":0,"avg_duration_ms":0},"results":[]}' > results/latest.json
+            python3 generate_dashboard.py results/latest.json results/index.html || \
+              echo "<html><body><h1>No data yet</h1></body></html>" > results/index.html
+          fi
 
-      - name: Write badge data
+      - name: Write badge
         run: |
           python3 - <<'PYEOF'
           import json
           from pathlib import Path
-          d = json.loads(Path("results/latest.json").read_text())
-          rate = d["summary"]["pass_rate"]
-          color = "brightgreen" if rate >= 95 else "yellow" if rate >= 80 else "red"
+          try:
+              d = json.loads(Path("results/latest.json").read_text())
+              rate = d["summary"]["pass_rate"]
+              color = "brightgreen" if rate >= 95 else "yellow" if rate >= 80 else "red"
+          except Exception:
+              rate, color = 0, "lightgrey"
           badge = {"schemaVersion": 1, "label": "e2e", "message": f"{rate}% pass", "color": color}
           Path("results/badge.json").write_text(json.dumps(badge))
-          print(f"Badge: {badge['message']} ({color})")
           PYEOF
+
+      - name: Copy history
+        run: |
+          mkdir -p results/history
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          cp results/latest.json results/history/${TIMESTAMP}.json 2>/dev/null || true
+          ls -t results/history/*.json 2>/dev/null | tail -n +51 | xargs rm -f 2>/dev/null || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -69,7 +85,11 @@ jobs:
 
       - name: Summary
         run: |
-          PASS=$(python3 -c "import json; d=json.load(open('results/latest.json')); print(d['summary']['pass_rate'])")
+          PASS=$(python3 -c "import json; d=json.load(open('results/latest.json')); print(d['summary']['pass_rate'])" 2>/dev/null || echo "?")
+          FAILED=$(python3 -c "import json; d=json.load(open('results/latest.json')); print(d['summary']['failed'])" 2>/dev/null || echo "?")
           echo "## E2E Results" >> $GITHUB_STEP_SUMMARY
-          echo "Pass rate: **${PASS}%**" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 Dashboard: https://afborda.github.io/synthfin-status/" >> $GITHUB_STEP_SUMMARY
+          echo "| Pass Rate | Failed |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **${PASS}%** | ${FAILED} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [Dashboard](https://afborda.github.io/synthfin-status/)" >> $GITHUB_STEP_SUMMARY
